@@ -1,7 +1,7 @@
 function Clear-EdgeData {
     $edgeProcesses = @("msedge")
 
-    # Stopping all running processes to make sure its not running.
+    # Stopping all running processes to make sure it's not running.
     foreach ($processName in $edgeProcesses) {
         Get-Process -Name $processName -ErrorAction SilentlyContinue | ForEach-Object {
             try {
@@ -13,8 +13,17 @@ function Clear-EdgeData {
         }
     }
 
-    # Pausing two seconds to allow process termination before continuing.
-    Start-Sleep -Seconds 2
+    # Monitor the closure tasks.
+    while ($true) {
+        $runningProcesses = Get-Process -Name $edgeProcesses -ErrorAction SilentlyContinue
+        if ($runningProcesses.Count -eq 0) {
+            Write-Output "All $edgeProcesses processes have stopped."
+            break
+        } else {
+            Write-Output "Waiting for $edgeProcesses processes to stop..."
+            Start-Sleep -Seconds 1
+        }
+    }
 
     # Fetching current user home directory.
     $userHome = [System.Environment]::GetFolderPath('UserProfile')
